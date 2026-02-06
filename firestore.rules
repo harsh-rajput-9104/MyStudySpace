@@ -1,0 +1,41 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Users collection - each user can only access their own document
+    match /users/{userId} {
+      // Allow read and write only if authenticated user matches document ID
+      allow read, write: if request.auth != null 
+                         && request.auth.uid == userId;
+      
+      // Subjects subcollection - user-scoped
+      match /subjects/{subjectId} {
+        allow read, write: if request.auth != null 
+                           && request.auth.uid == userId;
+      }
+      
+      // Assignments subcollection - user-scoped
+      match /assignments/{assignmentId} {
+        allow read, write: if request.auth != null 
+                           && request.auth.uid == userId;
+      }
+      
+      // Exams subcollection - user-scoped
+      match /exams/{examId} {
+        allow read, write: if request.auth != null 
+                           && request.auth.uid == userId;
+      }
+      
+      // Notes subcollection - user-scoped (if migrated to Firestore)
+      match /notes/{noteId} {
+        allow read, write: if request.auth != null 
+                           && request.auth.uid == userId;
+      }
+    }
+    
+    // Default deny all other access
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
